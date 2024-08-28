@@ -19,7 +19,7 @@ def get_db_connection():
     return conn
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5500","http://127.0.0.1:5501"]}})
+CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5500","http://127.0.0.1:5501","https://library-front-end-50h2.onrender.com"]}})
 
 
 @app.route('/', methods=['GET'])
