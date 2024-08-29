@@ -38,7 +38,7 @@ def delete_book(index):
         conn = get_db_connection()
         cur = conn.cursor()
         # Execute the DELETE SQL command
-        cur.execute("DELETE FROM books WHERE id = %s RETURNING *;", (index,))
+        cur.execute("DELETE FROM books WHERE book_id = %s RETURNING *;", (index,))
         deleted_book = cur.fetchone()
         
         # Check if the book was found and deleted
