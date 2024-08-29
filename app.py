@@ -22,7 +22,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5500","http://127.0.0.1:5501","http://127.0.0.1:5501/index.html","https://library-front-end-50h2.onrender.com"]}})
 
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET',"POST"])
 def show_books():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
