@@ -4,6 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from flask_cors import CORS
+from datetime import datetime
 
 
 load_dotenv()
@@ -130,6 +131,41 @@ def modify_book(index):
     except Exception as e:
         conn.rollback()  # Roll back the transaction on error
         return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/loan', methods=['POST'])
+def loan_book():
+    data = request.json
+    book_id = data.get('book_id')
+    member_id = data.get('member_id')
+    loan_date = data.get('loan_date', datetime.now().date())
+    due_date = data.get('due_date')
+    
+    conn = get_db_connection(cursor_factory=RealDictCursor)
+    c = conn.cursor()
+    # Check if the book is available
+    c.execute('SELECT available FROM Books WHERE book_id = %s', (book_id,))
+    result = c.fetchone()
+    
+    if not result:
+        return jsonify({'error': 'Book not found'}), 404
+
+    available = result['available']
+    
+    if not available:
+        return jsonify({'error': 'Book is not available'}), 400
+
+    # Update the book availability
+    c.execute('UPDATE Books SET available = FALSE WHERE book_id = %s', (book_id,))
+    
+    # Insert into Loans table
+    c.execute('INSERT INTO Loans (book_id, member_id, loan_date, due_date) VALUES (%s, %s, %s, %s)', 
+              (book_id, member_id, loan_date, due_date))
+    
+    conn.commit()
+    return jsonify({'message': 'Book loaned successfully'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
