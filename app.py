@@ -133,14 +133,14 @@ def modify_book(index):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/books', methods=['GET'])
-def get_books():
-    conn = get_db_connection()
-    c = conn.cursor(cursor_factory=RealDictCursor)
-    c.execute('SELECT * FROM Books')
-    books = c.fetchall()
-    conn.close()  # Close the connection to avoid leaks
-    return jsonify(books), 200
+# @app.route('/books', methods=['GET'])
+# def get_books():
+#     conn = get_db_connection()
+#     c = conn.cursor(cursor_factory=RealDictCursor)
+#     c.execute('SELECT * FROM Books')
+#     books = c.fetchall()
+#     conn.close()  # Close the connection to avoid leaks
+#     return jsonify(books), 200
 
 @app.route('/members', methods=['GET'])
 def get_members():
