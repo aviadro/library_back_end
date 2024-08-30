@@ -135,8 +135,8 @@ def modify_book(index):
 
 @app.route('/books', methods=['GET'])
 def get_books():
-    conn = get_db_connection(cursor_factory=RealDictCursor)
-    c = conn.cursor()
+    conn = get_db_connection()
+    c = conn.cursor(cursor_factory=RealDictCursor)
     c.execute('SELECT * FROM Books')
     books = c.fetchall()
     conn.close()  # Close the connection to avoid leaks
@@ -145,8 +145,8 @@ def get_books():
 @app.route('/members', methods=['GET'])
 def get_members():
     try:
-        conn = get_db_connection(cursor_factory=RealDictCursor)
-        c = conn.cursor()
+        conn = get_db_connection()
+        c = conn.cursor(cursor_factory=RealDictCursor)
         c.execute('SELECT * FROM Members')
         members = c.fetchall()
         return jsonify(members), 200
@@ -164,8 +164,8 @@ def loan_book():
     loan_date = data.get('loan_date', datetime.now().date())
     due_date = data.get('due_date')
     
-    conn = get_db_connection(cursor_factory=RealDictCursor)
-    c = conn.cursor()
+    conn = get_db_connection()
+    c = conn.cursor(cursor_factory=RealDictCursor)
     # Check if the book is available
     c.execute('SELECT available FROM Books WHERE book_id = %s', (book_id,))
     result = c.fetchone()
