@@ -24,15 +24,32 @@ CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5500","http://127.0.0
 
 @app.route('/', methods=['GET', 'POST'])
 def show_books():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
     if request.method == 'GET':
-        conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute('SELECT book_id AS id, title, author, published_year, image_url, available FROM books;')
+        search_query = request.args.get('search', '').strip().lower()
+        
+        # SQL query with search filter
+        if search_query:
+            cur.execute(
+                """
+                SELECT book_id AS id, title, author, published_year, image_url, available 
+                FROM books 
+                WHERE LOWER(title) LIKE %s OR LOWER(author) LIKE %s;
+                """,
+                (f'%{search_query}%', f'%{search_query}%')
+            )
+        else:
+            cur.execute(
+                'SELECT book_id AS id, title, author, published_year, image_url, available FROM books;'
+            )
+        
         books = cur.fetchall()
         cur.close()
         conn.close()
         return jsonify(books)
-    
+        
     elif request.method == 'POST':
         new_book = request.get_json()
         title = new_book['title']
