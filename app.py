@@ -144,12 +144,15 @@ def get_books():
 
 @app.route('/members', methods=['GET'])
 def get_members():
-    conn = get_db_connection(cursor_factory=RealDictCursor)
-    c = conn.cursor()
-    c.execute('SELECT * FROM Members')
-    members = c.fetchall()
-    conn.close()  # Close the connection to avoid leaks
-    return jsonify(members), 200
+    try:
+        conn = get_db_connection(cursor_factory=RealDictCursor)
+        c = conn.cursor()
+        c.execute('SELECT * FROM Members')
+        members = c.fetchall()
+        return jsonify(members), 200
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
 
 
 
