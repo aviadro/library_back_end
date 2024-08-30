@@ -133,6 +133,16 @@ def modify_book(index):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/books', methods=['GET'])
+def get_books():
+    conn = get_db_connection(cursor_factory=RealDictCursor)
+    c = conn.cursor()
+    c.execute('SELECT * FROM Books')
+    books = c.fetchall()
+    return jsonify(books), 200
+
+
+
 
 @app.route('/loan', methods=['POST'])
 def loan_book():
