@@ -139,8 +139,17 @@ def get_books():
     c = conn.cursor()
     c.execute('SELECT * FROM Books')
     books = c.fetchall()
+    conn.close()  # Close the connection to avoid leaks
     return jsonify(books), 200
 
+@app.route('/members', methods=['GET'])
+def get_members():
+    conn = get_db_connection(cursor_factory=RealDictCursor)
+    c = conn.cursor()
+    c.execute('SELECT * FROM Members')
+    members = c.fetchall()
+    conn.close()  # Close the connection to avoid leaks
+    return jsonify(members), 200
 
 
 
