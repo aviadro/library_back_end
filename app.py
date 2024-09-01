@@ -231,5 +231,32 @@ def return_book():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/loan/<int:book_id>', methods=['GET'])
+def get_loan_member(book_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Query to find the member who loaned this book and the loan is still active (i.e., return_date is NULL)
+        cur.execute('''
+            SELECT Members.member_id, Members.name
+            FROM Loans
+            JOIN Members ON Loans.member_id = Members.member_id
+            WHERE Loans.book_id = %s AND Loans.return_date IS NULL
+        ''', (book_id,))
+        
+        member = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if member:
+            return jsonify(member), 200
+        else:
+            return jsonify({"message": "No active loan for this book."}), 404
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)
