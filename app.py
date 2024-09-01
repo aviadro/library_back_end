@@ -189,5 +189,47 @@ def loan_book():
     return jsonify({'message': 'Book loaned successfully'}), 200
 
 
+@app.route('/return', methods=['POST'])
+def return_book():
+    data = request.json
+    book_id = data.get('book_id')
+    member_id = data.get('member_id')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Check if the loan exists and is not yet returned
+        cur.execute('''
+            SELECT * FROM Loans 
+            WHERE book_id = %s AND member_id = %s AND return_date IS NULL
+            ''', (book_id, member_id))
+        
+        loan = cur.fetchone()
+        if not loan:
+            return jsonify({'error': 'No active loan found for this book and member'}), 404
+
+        # Update the Loans table to set the return date
+        return_date = datetime.now().date()
+        cur.execute('''
+            UPDATE Loans 
+            SET return_date = %s 
+            WHERE loan_id = %s
+            ''', (return_date, loan['loan_id']))
+
+        # Update the book availability
+        cur.execute('UPDATE Books SET available = TRUE WHERE book_id = %s', (book_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'Book returned successfully'}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)
